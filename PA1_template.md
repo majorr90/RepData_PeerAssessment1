@@ -1,11 +1,6 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-author: Matthew Orr
-date: 03/13/2017
-output: 
-  html_document:
-    keep_md: true
----
+# Reproducible Research: Peer Assessment 1
+Matthew Orr  
+03/13/2017  
 #About
 
 This project was done as part of *Johns Hopkins University*'s *Data Science Specialization* offered on *Coursera.org*.
@@ -13,16 +8,35 @@ This project was done as part of *Johns Hopkins University*'s *Data Science Spec
 ##Libraries
 
 The following libraries were used for this project:
-```{r}
+
+```r
 library(ggplot2)
 library(lattice)
 library(dplyr)
 ```
 
+```
+## 
+## Attaching package: 'dplyr'
+```
+
+```
+## The following objects are masked from 'package:stats':
+## 
+##     filter, lag
+```
+
+```
+## The following objects are masked from 'package:base':
+## 
+##     intersect, setdiff, setequal, union
+```
+
 ## Loading and preprocessing the data
 
 Code for reading in the dataset and/or processing the data:
-```{r}
+
+```r
 temp <- tempfile()
 download.file("https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip",
   temp, method = "curl")
@@ -35,14 +49,18 @@ activity <- read.csv(activity)
 ## What is mean total number of steps taken per day?
 
 Histogram of the total number of steps taken each day:
-```{r}
+
+```r
 activity_byDate <- aggregate(steps~date, activity, sum)
 ggplot(activity_byDate, aes(steps)) + geom_histogram(binwidth = 2500, 
   boundary = 2500) + labs(x = "Steps", y = "Frequency", title = "Total Daily Steps")
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-3-1.png)<!-- -->
+
 Mean and median number of steps taken each day:
-```{r}
+
+```r
 meanSteps <- mean(activity_byDate$steps)
 medianSteps <- median(activity_byDate$steps)
 ```
@@ -51,14 +69,18 @@ The median number of steps taken each day is `medianSteps`.
 
 ## What is the average daily activity pattern?
 Time series plot of the average number of steps taken:
-```{r}
+
+```r
 activity_byInterval <- aggregate(steps~interval, activity, mean)
 ggplot(activity_byInterval, aes(interval, steps)) + geom_line() + labs(
   x = "Interval", y = "Steps", title = "Average Daily Steps by 5-Minute Intervals")
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-5-1.png)<!-- -->
+
 The 5-minute interval that, on average, contains the maximum number of steps:
-```{r}
+
+```r
 maxSteps <- max(activity_byInterval$steps)
 interval_maxSteps <- activity_byInterval[activity_byInterval$steps==maxSteps,1]
 ```
@@ -71,7 +93,8 @@ The maximum number of steps is `maxSteps` which occured on the `interval_maxStep
 Code to describe and show a strategy for imputing missing data:
 I plugged in average numbers from the previous activity_byInterval chart.
 
-```{r}
+
+```r
 qty_missingValues <- nrow(activity[is.na(activity$steps),])
 activity_complete <- activity
 for(i in 1:nrow(activity_complete)) {
@@ -85,7 +108,8 @@ activity_byDate_complete <- aggregate(steps~date, activity_complete, sum)
 ```
 
 Histogram of the total number of steps taken each day after missing values are imputed
-```{r}
+
+```r
 ggplot(NULL, aes(steps)) + 
   geom_histogram(data=activity_byDate, binwidth = 2500, boundary = 2500, 
   position = "stack", fill = "green", alpha = 0.2) + 
@@ -94,7 +118,10 @@ ggplot(NULL, aes(steps)) +
   labs(x = "Steps", y = "Frequency", title = "Total Daily Steps (Compare)")
 ```
 
-```{r}
+![](PA1_template_files/figure-html/unnamed-chunk-8-1.png)<!-- -->
+
+
+```r
 meanSteps_complete <- mean(activity_byDate_complete$steps)
 medianSteps_complete <- median(activity_byDate_complete$steps)
 ```
@@ -106,7 +133,8 @@ After adding the missing values:
 ## Are there differences in activity patterns between weekdays and weekends?
 
 Panel plot comparing the average number of steps taken per 5-minute interval across weekdays and weekends:
-```{r}
+
+```r
 activity_complete$date <- as.Date(activity_complete$date)
 activity_complete$day <- weekdays(activity_complete$date)
 activity_complete$dayOfWeek <- as.factor(ifelse(
@@ -116,3 +144,5 @@ activity_byDayOfWeek <- activity_complete%>%group_by(interval, dayOfWeek)%>%summ
 xyplot(activity_byDayOfWeek$steps ~ activity_byDayOfWeek$interval|activity_byDayOfWeek$dayOfWeek, 
   main="Average Daily Steps by 5-Minute Intervals per Day",xlab="Interval", ylab="Steps",layout=c(1,2), type="l")
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-10-1.png)<!-- -->
